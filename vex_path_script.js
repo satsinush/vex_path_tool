@@ -61,7 +61,7 @@ function updatePoints(){
     if(points.length > 0){
         for(i=0; i<points.length-1; i++){
             points[i].distanceToNext = Math.sqrt((points[i+1].x-points[i].x)**2+(points[i+1].y-points[i].y)**2);
-            if(points[i+1].x-points[i].x > 0){
+            if(points[i+1].x-points[i].x >= 0){
                 points[i].headingToNext = 90-Math.atan((points[i+1].y-points[i].y)/(points[i+1].x-points[i].x))*180/Math.PI;
             }else{
                 points[i].headingToNext = 270-Math.atan((points[i+1].y-points[i].y)/(points[i+1].x-points[i].x))*180/Math.PI;
