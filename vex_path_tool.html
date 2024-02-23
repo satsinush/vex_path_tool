@@ -15,7 +15,7 @@
 
     .tableCenter tbody{
         height: 400px;
-        width: 430px;
+        width: 550px;
         display: block;
         overflow-y: auto;
     }
@@ -42,15 +42,22 @@
             <canvas id="canvas" style="border:1px solid #000000"></canvas>
         </div>
         <div class="column" style="height: 500px; min-width: 400px;">
-            <input id="skills_check" type="checkbox"></input><label for="skills_check">Skills</label><br>
+            <label for="skills_check">Skills</label><input id="skills_check" type="checkbox">
+            <label for="snapInput">Snap to </label><input style="width: 50px;" id="snapInput" type="number" value="0">
+            <input id="exportButton" type="button" value="Export data" onclick="exportData()">
+            <input type="button" value="Import data" id="importFile" onclick="importData()">
+            <br>
             <table id="point_list" class="tableCenter">
                 <tr style="vertical-align: top;">
                     <th style="width: 25px;">#</th>
-                    <th style="width: 60px;">X</th>
-                    <th style="width: 60px;">Y</th>
-                    <th style="width: 60px;">Distance</th>
-                    <th style="width: 60px;">Heading</th>
-                    <th style="width: 60px;"></th>
+                    <th style="min-width: 60px;">X</th>
+                    <th style="min-width: 60px;">Y</th>
+                    <th style="min-width: 60px;">D-last</th>
+                    <th style="min-width: 60px;">H-last</th>
+                    <th style="min-width: 60px;">D-next</th>
+                    <th style="min-width: 60px;">H-next</th>
+                    <th style="width: 60px;"><input style="width: 50px;" type="button" value="New" onclick="newPointButton()"></th>
+                    <th style="width: 60px;"><input style="width: 50px;" type="button" value="Clear" onclick="clearButton()"></th>
                 </tr>
             </table>
         </div>

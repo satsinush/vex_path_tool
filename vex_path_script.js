@@ -1,7 +1,9 @@
-//list of points with x,y, heading, distance values, delete button, (scrollable)
+//distance from last or to next?
 //copy output to clipboard
 //robot outline
-//output code
+//export as c++ auton code
+//export as list of points
+//import list of points
 
 var canvas = document.getElementById("canvas");
 var point_list = document.getElementById("point_list");
@@ -23,6 +25,17 @@ skills = false;
 PX_TO_INCHES = 1/pixelsPerInch;
 INCHES_TO_PX = pixelsPerInch;
 
+class Robot{
+    constructor(x,y,width,length,heading){
+        this.x=x;
+        this.y=y;
+        this.width=width;
+        this.length=length;
+        this.heading=heading;
+    }
+}
+robot = new Robot(-1000,-1000,15,18,0);
+
 class Point{
     constructor(x,y){
         this.x = x;
@@ -30,6 +43,8 @@ class Point{
     }
     headingToNext = null;
     distanceToNext = null;
+    headingFromLast = null;
+    distanceFromLast = null;
 
     getPx_X() {
         return(inchesToPx_X(this.x));
@@ -42,12 +57,13 @@ class Point{
 points = [];
 
 function newPoint(x,y){
-    p = new Point(x,y);
-    return(p);
+    points.push(new Point(x,y));
 }
-
 function deletePoint(num){
     points.splice(num,1);
+}
+function clearAllPoints(){
+    points = [];
 }
 
 function print(message){
@@ -59,14 +75,29 @@ function roundToM(num, multiple){
 
 function updatePoints(){
     if(points.length > 0){
-        for(i=0; i<points.length-1; i++){
-            points[i].distanceToNext = Math.sqrt((points[i+1].x-points[i].x)**2+(points[i+1].y-points[i].y)**2);
-            if(points[i+1].x-points[i].x >= 0){
-                points[i].headingToNext = 90-Math.atan((points[i+1].y-points[i].y)/(points[i+1].x-points[i].x))*180/Math.PI;
-            }else{
-                points[i].headingToNext = 270-Math.atan((points[i+1].y-points[i].y)/(points[i+1].x-points[i].x))*180/Math.PI;
+        for(i=0; i<points.length; i++){
+            //distance/heading toNext
+            if(i<points.length-1){
+                points[i].distanceToNext = Math.sqrt((points[i+1].x-points[i].x)**2+(points[i+1].y-points[i].y)**2);
+                if(points[i+1].x-points[i].x >= 0){
+                    points[i].headingToNext = 90-Math.atan((points[i+1].y-points[i].y)/(points[i+1].x-points[i].x))*180/Math.PI;
+                }else{
+                    points[i].headingToNext = 270-Math.atan((points[i+1].y-points[i].y)/(points[i+1].x-points[i].x))*180/Math.PI;
+                }
+            }
+            //distance/heading fromLast
+            if(i > 0){
+                points[i].distanceFromLast = Math.sqrt((points[i].x-points[i-1].x)**2+(points[i].y-points[i-1].y)**2);
+                if(points[i].x-points[i-1].x >= 0){
+                    points[i].headingFromLast = 90-Math.atan((points[i].y-points[i-1].y)/(points[i].x-points[i-1].x))*180/Math.PI;
+                }else{
+                    points[i].headingFromLast = 270-Math.atan((points[i].y-points[i-1].y)/(points[i].x-points[i-1].x))*180/Math.PI;
+                }
             }
         }
+        robot.x = points[0].x;
+        robot.y = points[0].y;
+        robot.heading = points[0].headingToNext;
     }
     drawCanvas();
     updatePointsList();
@@ -75,7 +106,7 @@ function updatePoints(){
 function createInput(name, id, type, value, width, onchangeFunction){
     input = document.createElement("input");
     input.type = type;
-    input.id = name+toString(id);
+    input.id = name+id.toString();
     input.value = value;
     input.style.width = width;
     if(type == "button"){
@@ -91,6 +122,10 @@ function createInput(name, id, type, value, width, onchangeFunction){
         touchingPoint = id;
         drawCanvas();
     }
+    input.onmouseleave = function(event){
+        touchingPoint = null;
+        drawCanvas();
+    }
     return(input);
 }
 
@@ -104,15 +139,33 @@ function updateY(value, id){
     points[id].y = parseFloat(value);
     updatePoints();
 }
-function updateDistance(value, id){
-    points[id+1].x = points[id].x + value*Math.cos(-(points[id].headingToNext-90)*Math.PI/180);
-    points[id+1].y = points[id].y + value*Math.sin(-(points[id].headingToNext-90)*Math.PI/180);
-    updatePoints();
+function updateDistanceToNext(value, id){
+    if(id < points.length-1){
+        points[id+1].x = points[id].x + value*Math.cos(-(points[id].headingToNext-90)*Math.PI/180);
+        points[id+1].y = points[id].y + value*Math.sin(-(points[id].headingToNext-90)*Math.PI/180);
+        updatePoints();
+    }
 }
-function updateHeading(value, id){
-    points[id+1].x = points[id].x + points[id].distanceToNext*Math.cos(-(value-90)*Math.PI/180);
-    points[id+1].y = points[id].y + points[id].distanceToNext*Math.sin(-(value-90)*Math.PI/180);
-    updatePoints();
+function updateHeadingToNext(value, id){
+    if(id < points.length-1){
+        points[id+1].x = points[id].x + points[id].distanceToNext*Math.cos(-(value-90)*Math.PI/180);
+        points[id+1].y = points[id].y + points[id].distanceToNext*Math.sin(-(value-90)*Math.PI/180);
+        updatePoints();
+    }
+}
+function updateDistanceFromLast(value, id){
+    if(id > 0){
+        points[id].x = points[id-1].x + value*Math.cos(-(points[id-1].headingToNext-90)*Math.PI/180);
+        points[id].y = points[id-1].y + value*Math.sin(-(points[id-1].headingToNext-90)*Math.PI/180);
+        updatePoints();
+    }
+}
+function updateHeadingFromLast(value, id){
+    if(id > 0){
+        points[id].x = points[id-1].x + points[id-1].distanceToNext*Math.cos(-(value-90)*Math.PI/180);
+        points[id].y = points[id-1].y + points[id-1].distanceToNext*Math.sin(-(value-90)*Math.PI/180);
+        updatePoints();
+    }
 }
 function deleteButton(value, id){
     deletePoint(id);
@@ -122,15 +175,32 @@ function insertButton(value, id){
     points.splice(id+1,0,new Point(points[id].x,points[id].y));
     updatePoints();
 }
+function newPointButton(){
+    newPoint(0,0);
+    updatePoints();
+}
+function clearButton(){
+    if(confirm("All points will be cleared. This action cannot be undone.")){
+        clearAllPoints();
+        updatePoints();
+    }
+}
+snapInput = document.getElementById("snapInput");
+snapInput.onchange = function(event){
+    snapTo = parseFloat(this.value);
+    updatePoints();   
+}
 
 function updatePointsList(){
     //clear table
-    for(i=0; i<tableSize; i++){
+    numRows = point_list.rows.length-1;
+    for(i=0; i<numRows; i++){
         point_list.deleteRow(1);
     }
 
     for(i=0; i<points.length; i++){
         row = point_list.insertRow(point_list.length);
+        row.draggable="true";
         cell = row.insertCell(row.length);
         cell.innerHTML = i+1;
         cell.width = "25px";
@@ -138,11 +208,20 @@ function updatePointsList(){
             createInput("xInput", i,"number",points[i].x.toFixed(2),"50px", updateX));
         row.insertCell(row.length).appendChild(
             createInput("yInput", i,"number",points[i].y.toFixed(2),"50px", updateY));
-        if(points[i].distanceToNext != null && points[i].headingToNext != null){
+        if(i > 0){
             row.insertCell(row.length).appendChild(
-                createInput("distanceInput", i,"number",points[i].distanceToNext.toFixed(2),"50px", updateDistance));
+                createInput("distanceLastInput", i,"number",points[i].distanceFromLast.toFixed(2),"50px", updateDistanceFromLast));
             row.insertCell(row.length).appendChild(
-                createInput("headingInput", i,"number",points[i].headingToNext.toFixed(2),"50px", updateHeading));
+                createInput("headingLastInput", i,"number",points[i].headingFromLast.toFixed(2),"50px", updateHeadingFromLast));
+        }else{
+            row.insertCell();
+            row.insertCell();
+        }
+        if(i < points.length-1){
+            row.insertCell(row.length).appendChild(
+                createInput("distanceNextInput", i,"number",points[i].distanceToNext.toFixed(2),"50px", updateDistanceToNext));
+            row.insertCell(row.length).appendChild(
+                createInput("headingNextInput", i,"number",points[i].headingToNext.toFixed(2),"50px", updateHeadingToNext));
         }else{
             row.insertCell();
             row.insertCell();
@@ -152,21 +231,14 @@ function updatePointsList(){
         row.insertCell(row.length).appendChild(
             createInput("deleteButton", i, "button","Delete","50px",deleteButton));
     }
-    tableSize = points.length;
 }
 
 function pxToInches_X(input){
     x = (input-canvas.width/2)*PX_TO_INCHES;
-    if(snapTo != 0){
-        x = Math.round(x/(snapTo))*(snapTo);
-    }
     return(x);
 }
 function pxToInches_Y(input){
     y = (-input+canvas.height/2)*PX_TO_INCHES;
-    if(snapTo != 0){
-        y = Math.round(y/(snapTo))*(snapTo);
-    }
     return(y);
 }
 
@@ -177,25 +249,12 @@ function inchesToPx_Y(input){
     return(-input*INCHES_TO_PX+canvas.height/2);
 }
 
-function getX(input){
-    x = pxToInches_X(input);
-    if(x > 72){
-        //x = 72;
+function snap(input){
+    if(snapTo != 0){
+        return(Math.round(input/(snapTo))*(snapTo));
+    }else{
+        return(input);
     }
-    if(x < -72){
-        //x = -72;
-    }
-    return(x);
-}
-function getY(input){
-    y = pxToInches_Y(input);
-    if(y > 72){
-        //y = 72;
-    }
-    if(y < -72){
-        //y = -72;
-    }
-    return(y);
 }
 
 function drawCanvas(){
@@ -216,11 +275,49 @@ function drawCanvas(){
     ctx.globalAlpha = 1;
 
     if(points.length > 0){
+        //draw robot
+        ctx.beginPath();
+        angle = 360+(robot.heading)-90;
+        angle = -robot.heading+90;
+        print(angle);
+        dAngle = Math.atan(robot.width/robot.length)*(180/Math.PI)
+        d = Math.sqrt((robot.width/2)**2+(robot.length/2)**2);
+        ctx.moveTo(
+            inchesToPx_X(robot.x+d*Math.cos((angle+dAngle)*(Math.PI/180))),
+            inchesToPx_Y(robot.y+d*Math.sin((angle+dAngle)*(Math.PI/180))));
+        ctx.lineTo(
+            inchesToPx_X(robot.x+d*Math.cos((angle-dAngle)*(Math.PI/180))),
+            inchesToPx_Y(robot.y+d*Math.sin((angle-dAngle)*(Math.PI/180))));
+        ctx.lineTo(
+            inchesToPx_X(robot.x+d*Math.cos((angle+180+dAngle)*(Math.PI/180))),
+            inchesToPx_Y(robot.y+d*Math.sin((angle+180+dAngle)*(Math.PI/180))));
+        ctx.lineTo(
+            inchesToPx_X(robot.x+d*Math.cos((angle+180-dAngle)*(Math.PI/180))),
+            inchesToPx_Y(robot.y+d*Math.sin((angle+180-dAngle)*(Math.PI/180))));
+        ctx.lineTo(
+            inchesToPx_X(robot.x+d*Math.cos((angle+dAngle*1)*(Math.PI/180))),
+            inchesToPx_Y(robot.y+d*Math.sin((angle+dAngle*1)*(Math.PI/180))));
+        ctx.stroke();
+        ctx.closePath(); 
+
         //draw line 
         ctx.beginPath();
         ctx.moveTo(points[0].getPx_X(), points[0].getPx_Y());
         for(i=0; i<points.length; i++){
-            ctx.lineTo(points[i].getPx_X(), points[i].getPx_Y());
+            x = points[i].x;
+            y = points[i].y;
+            ctx.lineTo(inchesToPx_X(x), inchesToPx_Y(y));
+            if(points[i].headingFromLast != null){
+                midX = (points[i].x+points[i-1].x)/2
+                midY = (points[i].y+points[i-1].y)/2
+                vAngle = 360+(points[i].headingFromLast)-90;
+                arrowSize = 10;
+                ctx.moveTo(inchesToPx_X(midX),inchesToPx_Y(midY));
+                ctx.lineTo(inchesToPx_X(midX)+(arrowSize)*Math.cos((vAngle+150)*(Math.PI/180)), inchesToPx_Y(midY)+(arrowSize)*Math.sin((vAngle+150)*(Math.PI/180)));
+                ctx.moveTo(inchesToPx_X(midX),inchesToPx_Y(midY));
+                ctx.lineTo(inchesToPx_X(midX)+(arrowSize)*Math.cos((vAngle-150)*(Math.PI/180)), inchesToPx_Y(midY)+(arrowSize)*Math.sin((vAngle-150)*(Math.PI/180)));
+                ctx.moveTo(inchesToPx_X(x), inchesToPx_Y(y));
+            }
         }
         ctx.stroke();
         ctx.closePath();
@@ -265,12 +362,12 @@ selectedPoint = null;
 touchingPoint = null;
 canvas.onmousedown = function(event){
     mouseDown = true;
-    x=getX(event.offsetX);
-    y=getY(event.offsetY);
+    x=pxToInches_X(event.offsetX);
+    y=pxToInches_Y(event.offsetY);
     selectedPoint = getTouching(x,y);
     if(event.button == 0){
         if(selectedPoint == null){
-            points.push(newPoint(x,y));
+            newPoint(snap(x),snap(y));
             touchingPoint = points.length-1;
             selectedPoint = points.length-1;
         }else{
@@ -287,23 +384,87 @@ canvas.onmousedown = function(event){
 }
 
 canvas.onmouseup = function(event){
-    x=getX(event.offsetX);
-    y=getY(event.offsetY);
+    x=pxToInches_X(event.offsetX);
+    y=pxToInches_Y(event.offsetY);
     mouseDown = false;
     updatePoints();
 }
 
 canvas.onmousemove = function(event){
-    x=getX(event.offsetX);
-    y=getY(event.offsetY);
+    x=pxToInches_X(event.offsetX);
+    y=pxToInches_Y(event.offsetY);
     if(mouseDown && selectedPoint != null){
-        points[selectedPoint].x = x;
-        points[selectedPoint].y = y;
+        points[selectedPoint].x = snap(x);
+        points[selectedPoint].y = snap(y);
     }else{
         getTouching(x,y);
     }
     updatePoints();
 }
 
+function exportData(){
+    content = "";
+    content+=skills.toString()+","+snapTo.toString()+"\n";
+    for(i=0; i<points.length; i++){
+        content += points[i].x.toString() + "," + points[i].y.toString() +"\n";
+    }
+
+    link = document.createElement("a");
+    file =  new Blob([content],{type: "text/plain"});
+    link.href = URL.createObjectURL(file);
+    link.download = "vex_path_data.txt";
+    link.click();
+    URL.revokeObjectURL(link.href);
+}
+function importData(){
+    if(confirm("Importing a file will clear all existing points."))
+    input = document.createElement('input');
+    input.accept = ".txt"
+    input.type = 'file';
+    input.onchange = function(){
+        //load file
+        file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function() {
+            contents = reader.result;
+            //parse contents
+            token = "";
+            tokenNum = 0;
+            x=0;
+            y=0;
+            pList = []
+            for(i=0; i<contents.length; i++){
+                char = contents[i];
+                if(char == "," || char=="\n"){
+                    if(tokenNum==0){
+                        skills = (token == "true");
+                        skills_check.checked = skills;
+                    }
+                    if(tokenNum==1){
+                        snapTo = parseFloat(token);
+                        snapInput.value = snapTo;
+                    }
+                    if(tokenNum >= 2){
+                        if((tokenNum-2)%2==0){
+                            //print([tokenNum,token]);
+                            x = parseFloat(token);
+                        }else{
+                            y = parseFloat(token);
+                            pList.push(new Point(x,y));
+                        }
+                    }
+                    tokenNum++;
+                    token = "";
+                }else{
+                    token += char;
+                }
+            }
+            points = Array.from(pList);
+            updatePoints();
+        };
+        reader.readAsText(file);
+    }
+    input.click();
+}
+
 updatePoints();
-//drawCanvas();
