@@ -13,8 +13,13 @@
         margin-right: auto;
     }
 
-    .tableCenter tbody{
-        height: 400px;
+    .pointTable{
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .pointTable tbody{
+        max-height: 400px;
         width: 550px;
         display: block;
         overflow-y: auto;
@@ -39,32 +44,45 @@
 
     <div style="text-align:center;" class="row">
         <div class="column" style="min-width: 500px;">
-            <canvas id="canvas" style="border:1px solid #000000"></canvas>
+            <canvas id="canvas" style="border:1px solid #000000" width="0px" height="0px"></canvas>
         </div>
         <div class="column" style="height: 500px; min-width: 400px;">
+            <header>Robot Data</header>
+            <table id="robotData" class="tableCenter">
+                <tr>
+                    <td><label for="lengthInput">Length</label></td>
+                    <td><input type="number" id="lengthInput" style="width: 50px;"></td>
+                    <td><label for="widthInput">Width</label></td>
+                    <td><input type="number" id="widthInput" style="width: 50px;"></td>
+                    <td><label for="speedInput">Speed</label></td>
+                    <td><input type="number" id="speedInput" style="width: 50px;"></td>
+                </tr>
+            </table>
+            <input type="range" style="width: 200px;" id="robot_slider" value="0" max="1000">
+            <input type="button" style="width: 75px;" id="playButton" value="Play">
+            <br><br>
             <label for="skills_check">Skills</label><input id="skills_check" type="checkbox">
             <label for="snapInput">Snap to </label><input style="width: 50px;" id="snapInput" type="number" value="0">
-            <input id="exportButton" type="button" value="Export data" onclick="exportData()">
-            <input type="button" value="Import data" id="importFile" onclick="importData()">
             <br>
-            <table id="point_list" class="tableCenter">
+            <table id="point_list" class="pointTable">
                 <tr style="vertical-align: top;">
-                    <th style="width: 25px;">#</th>
+                    <th style="width: 60px;">Num</th>
                     <th style="min-width: 60px;">X</th>
                     <th style="min-width: 60px;">Y</th>
-                    <th style="min-width: 60px;">D-last</th>
-                    <th style="min-width: 60px;">H-last</th>
-                    <th style="min-width: 60px;">D-next</th>
-                    <th style="min-width: 60px;">H-next</th>
+                    <th style="min-width: 60px;">D</th>
+                    <th style="min-width: 60px;">H</th>
                     <th style="width: 60px;"><input style="width: 50px;" type="button" value="New" onclick="newPointButton()"></th>
                     <th style="width: 60px;"><input style="width: 50px;" type="button" value="Clear" onclick="clearButton()"></th>
                 </tr>
             </table>
+            <input id="exportButton" type="button" value="Export data" onclick="exportData()">
+            <input type="button" value="Import data" id="importFile" onclick="importData()">
         </div>
     </div>
     <div style="display: none;">
         <img id="field_image" src="assets/field.png">
         <img id="skills_field_image" src="assets/skills.png">
+        <img id="robot_image" src="assets/robot.png">
     </div>
 
     <script src="vex_path_script.js"></script> 
