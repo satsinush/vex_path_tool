@@ -62,9 +62,11 @@ speedInput.onchange = function(event){
 }
 
 class Point{
-    constructor(x,y){
+    constructor(x,y,t,r){
         this.x = x;
         this.y = y;
+        this.timeout = t;
+        this.reversed = r;
     }
     headingToNext = null;
     distanceToNext = null;
@@ -82,7 +84,7 @@ class Point{
 points = [];
 
 function newPoint(x,y){
-    points.push(new Point(x,y));
+    points.push(new Point(x,y,1000,false));
 }
 function deletePoint(num){
     points.splice(num,1);
@@ -99,7 +101,7 @@ function roundToM(num, multiple){
 }
 
 var pathLength = 0;
-function updatePoints(){
+function updatePoints(updateInputs = true){
     if(points.length > 0){
         pathLength = 0;
         for(i=0; i<points.length; i++){
@@ -143,15 +145,23 @@ function createInput(name, id, type, value, width, onchangeFunction){
     input = document.createElement("input");
     input.type = type;
     input.id = name+id.toString();
-    input.value = value;
     input.style.width = width;
     if(type == "button"){
+        input.value = value;
         input.onclick = function(){
-            onchangeFunction(this.value, id);
+            onchangeFunction(this.value, id, name);
         }
-    }else{
+    }
+    if(type == "checkbox"){
+        input.checked = value;
         input.onchange = function(){
-            onchangeFunction(this.value, id);
+            onchangeFunction(this.checked, id, name);
+        }
+    }
+    if(!(type == "checkbox" || type == "button")){
+        input.value = value;
+        input.onchange = function(){
+            onchangeFunction(this.value, id, name);
         }
     }
     input.onmouseover = function(event){
@@ -167,56 +177,76 @@ function createInput(name, id, type, value, width, onchangeFunction){
 
 tableSize = 0;
 
-function updateX(value, id){
+function updateX(value, id, name){
     points[id].x = parseFloat(value);
+    //lastFocused = name+id.toString();
     updatePoints();
+    document.getElementById(name+id.toString()).focus();
 }
-function updateY(value, id){
+function updateY(value, id, name){
     points[id].y = parseFloat(value);
+    //lastFocused = name+id.toString();
     updatePoints();
+    document.getElementById(name+id.toString()).focus();
 }
-function updateDistanceToNext(value, id){
+function updateDistanceToNext(value, id, name){
     if(id < points.length-1){
         points[id+1].x = points[id].x + value*Math.cos(-(points[id].headingToNext-90)*Math.PI/180);
         points[id+1].y = points[id].y + value*Math.sin(-(points[id].headingToNext-90)*Math.PI/180);
+        //lastFocused = name+id.toString();
         updatePoints();
+        document.getElementById(name+id.toString()).focus();
     }
 }
-function updateHeadingToNext(value, id){
+function updateHeadingToNext(value, id, name){
     if(id < points.length-1){
         points[id+1].x = points[id].x + points[id].distanceToNext*Math.cos(-(value-90)*Math.PI/180);
         points[id+1].y = points[id].y + points[id].distanceToNext*Math.sin(-(value-90)*Math.PI/180);
+        //lastFocused = name+id.toString();
         updatePoints();
+        document.getElementById(name+id.toString()).focus();
     }
 }
-function updateDistanceFromLast(value, id){
+function updateDistanceFromLast(value, id, name){
     if(id > 0){
         points[id].x = points[id-1].x + value*Math.cos(-(points[id-1].headingToNext-90)*Math.PI/180);
         points[id].y = points[id-1].y + value*Math.sin(-(points[id-1].headingToNext-90)*Math.PI/180);
+        //lastFocused = name+id.toString();
         updatePoints();
+        document.getElementById(name+id.toString()).focus();
     }
 }
-function updateHeadingFromLast(value, id){
+function updateHeadingFromLast(value, id, name){
     if(id > 0){
         points[id].x = points[id-1].x + points[id-1].distanceToNext*Math.cos(-(value-90)*Math.PI/180);
         points[id].y = points[id-1].y + points[id-1].distanceToNext*Math.sin(-(value-90)*Math.PI/180);
+        //lastFocused = name+id.toString();
         updatePoints();
+        document.getElementById(name+id.toString()).focus();
     }
 }
 function deleteButton(value, id){
     deletePoint(id);
     updatePoints();
 }
-function insertButton(value, id){
-    points.splice(id+1,0,new Point(points[id].x,points[id].y));
+function insertButton(value, id, name){
+    points.splice(id+1,0,new Point(points[id].x,points[id].y,1000,false));
+    //lastFocused = name+id.toString();
     updatePoints();
+    document.getElementById(name+id.toString()).focus();
+}
+function reverseCheckButton(value, id, name){
+    //lastFocused = name+id.toString();
+    points[id].reversed = value;
+    updatePoints();
+    document.getElementById(name+id.toString()).focus();
 }
 function newPointButton(){
     newPoint(0,0);
     updatePoints();
 }
 function clearButton(){
-    if(confirm("All points will be cleared. This action cannot be undone.")){
+    if(confirm("Changes you made may not be saved.")){
         clearAllPoints();
         updatePoints();
     }
@@ -227,6 +257,7 @@ snapInput.onchange = function(event){
     updatePoints();   
 }
 
+lastFocused = null;
 function updatePointsList(){
     //clear table
     numRows = point_list.rows.length-1;
@@ -251,7 +282,10 @@ function updatePointsList(){
                 createInput("distanceLastInput", i,"number",points[i].distanceFromLast.toFixed(2),"50px", updateDistanceFromLast));
             row.insertCell(row.length).appendChild(
                 createInput("headingLastInput", i,"number",points[i].headingFromLast.toFixed(2),"50px", updateHeadingFromLast));
+            row.insertCell(row.length).appendChild(
+                createInput("reverseCheck", i, "checkbox",points[i].reversed,"20px",reverseCheckButton));
         }else{
+            row.insertCell();
             row.insertCell();
             row.insertCell();
         }
@@ -269,6 +303,10 @@ function updatePointsList(){
         row.insertCell(row.length).appendChild(
             createInput("deleteButton", i, "button","Delete","50px",deleteButton));
     }
+    //print(lastFocused);
+    //if(lastFocused != null){
+    //document.getElementById(lastFocused).focus();
+    //}
 }
 
 function pxToInches_X(input){
@@ -497,8 +535,13 @@ function updateRobotPosition(){
         }else{
             robot.x = points[index].x;
             robot.y = points[index].y;
-        }        
+        }
         robot.heading = points[index].headingToNext;
+        if(points.length-1 > index){
+            if(points[index+1].reversed){        
+                robot.heading = points[index].headingToNext+180;
+            }
+        }
     }
 }
 
@@ -530,7 +573,119 @@ playButton.onclick = function (){
     }
 }
 
-function exportData(){
+function updateInputFields(){
+    snapInput.value = snapTo;
+    skills_check.checked = skills;
+    widthInput.value = robot.width;
+    lengthInput.value = robot.length;
+    speedInput.value = robot.speed;
+}
+
+window.addEventListener('beforeunload', function (e) {
+    e.preventDefault();
+    e.returnValue = '';
+});
+
+function exportJSON(){
+    dict = {};
+    dict["snapTo"] = snapTo;
+    dict["skills"] = skills;
+    dict["robot"] = robot;
+    dict["points"] = points;
+    content = JSON.stringify(dict);
+    formattedContent = "";
+    numTabs = 0;
+    tabWidth = 2;
+    for(i=0; i<content.length; i++){
+        c = content[i];
+        formattedContent += c;
+        if("{[".includes(c)){
+            numTabs++;
+        }
+        if("}]".includes(c)){
+            numTabs--;
+        }
+        if(",{[".includes(c)){
+            formattedContent += "\n"+" ".repeat(numTabs*tabWidth);
+        }
+    }
+
+
+    link = document.createElement("a");
+    file =  new Blob([formattedContent],{type: "text/plain"});
+    link.href = URL.createObjectURL(file);
+    link.download = "vex_path_data.json";
+    link.click();
+    URL.revokeObjectURL(link.href);
+}
+
+function importJSON(){
+    if(confirm("Changes you made may not be saved.")){
+        input = document.createElement('input');
+        input.accept = ".json"
+        input.type = 'file';
+        input.onchange = function(){
+            //load file
+            file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function() {
+                contents = reader.result;
+                parsedObject = JSON.parse(contents);
+                
+                robot = parsedObject.robot;
+                //robot.progress = 0;
+                p = parsedObject.points;
+                skills = parsedObject.skills;
+                snapTo = parsedObject.snapTo;
+                points = [];
+                for(i=0; i<p.length; i++){
+                    points.push(new Point(p[i].x,p[i].y,p[i].timeout,p[i].reversed));
+                }
+
+                updateInputFields();
+                updatePoints();
+            };
+            reader.readAsText(file);
+        }
+        input.click();
+    }
+}
+
+function copyCode(){
+    navigator.clipboard.writeText(getFormattedCodeString());
+}
+
+function exportCode(){
+    exportTextFile(getFormattedCodeString(),"vexPathCode");
+}
+
+function getFormattedCodeString(){
+    content = "";
+    for(i=0; i<points.length; i++){
+        p = points[i];
+        content += `// Pos${i+1}\n`;
+        if(i != 0){
+            content += `chassis.turnTo(${p.x.toFixed(2)},${p.y.toFixed(2)},${p.timeout},${p.reversed});\n`;
+        }
+        content += `chassis.moveTo(${p.x.toFixed(2)},${p.y.toFixed(2)},${p.timeout});`;
+        if(i != points.length-1){
+            content += "\n\n";
+        }
+    }
+    return(content);
+}
+
+function exportTextFile(content,name){
+    link = document.createElement("a");
+    file =  new Blob([content],{type: "text/plain"});
+    link.href = URL.createObjectURL(file);
+    link.download = name + ".txt";
+    link.click();
+    URL.revokeObjectURL(link.href);
+}
+
+/*
+function exportTxt(){
     content = "";
     content+=skills.toString()+","+snapTo.toString()+"\n";
     content+=robot.length.toString()+","+robot.width.toString()+","+robot.speed.toString()+"\n";
@@ -545,8 +700,8 @@ function exportData(){
     link.click();
     URL.revokeObjectURL(link.href);
 }
-function importData(){
-    if(confirm("Importing a file will clear all existing points.")){
+function importTxt(){
+    if(confirm("Changes you made may not be saved.")){
         input = document.createElement('input');
         input.accept = ".txt"
         input.type = 'file';
@@ -590,7 +745,7 @@ function importData(){
                                 x = parseFloat(token);
                             }else{
                                 y = parseFloat(token);
-                                pList.push(new Point(x,y));
+                                pList.push(new Point(x,y,1000,false));
                             }
                         }
                         tokenNum++;
@@ -607,6 +762,7 @@ function importData(){
         input.click();
     }
 }
+*/
 
 updatePoints();
 setInterval(animateRobot,(1000/fps));

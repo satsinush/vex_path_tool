@@ -71,12 +71,15 @@
                     <th style="min-width: 60px;">Y</th>
                     <th style="min-width: 60px;">D</th>
                     <th style="min-width: 60px;">H</th>
+                    <th style="min-width: 50px;">R</th>
                     <th style="width: 60px;"><input style="width: 50px;" type="button" value="New" onclick="newPointButton()"></th>
                     <th style="width: 60px;"><input style="width: 50px;" type="button" value="Clear" onclick="clearButton()"></th>
                 </tr>
             </table>
-            <input id="exportButton" type="button" value="Export data" onclick="exportData()">
-            <input type="button" value="Import data" id="importFile" onclick="importData()">
+            <input id="copyCodeButton" type="button" value="Copy code" onclick="copyCode()">
+            <input id="exportCodeButton" type="button" value="Export code" onclick="exportCode()">
+            <input id="exportJSONButton" type="button" value="Export JSON" onclick="exportJSON()">
+            <input type="button" value="Import JSON" id="importJSONButton" onclick="importJSON()">
         </div>
     </div>
     <div style="display: none;">
