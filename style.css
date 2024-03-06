@@ -1,0 +1,30 @@
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    display: none;
+}
+
+.tableCenter{
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.pointTable{
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.pointTable tbody{
+    max-height: 400px;
+    width: 550px;
+    display: block;
+    overflow-y: auto;
+}
+
+.row {
+    display: flex;
+}
+
+.column {
+    flex: 50%;
+    width: 350;
+}

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+</head>
+<title>VEX Path</title>
+
+<div style="text-align:center;">
+    <header style="font-size: 50px"><strong>VEX Path</strong></header>
+    <br><br><br>
+</div>
+
+<div style="text-align:center;" class="row">
+    <div class="column" style="min-width: 500px;">
+        <canvas id="canvas" style="border:1px solid #000000" width="0px" height="0px"></canvas>
+    </div>
+    <div class="column" style="height: 500px; min-width: 400px;">
+        <header>Robot Data</header>
+        <table id="robotData" class="tableCenter">
+            <tr>
+                <td><label for="lengthInput">Length</label></td>
+                <td><input type="number" id="lengthInput" style="width: 50px;"></td>
+                <td><label for="widthInput">Width</label></td>
+                <td><input type="number" id="widthInput" style="width: 50px;"></td>
+                <td><label for="speedInput">Speed</label></td>
+                <td><input type="number" id="speedInput" style="width: 50px;"></td>
+            </tr>
+        </table>
+        <input type="range" style="width: 200px;" id="robot_slider" value="0" max="1000">
+        <input type="button" style="width: 75px;" id="playButton" value="Play">
+        <br><br>
+        <label for="skills_check">Skills</label><input id="skills_check" type="checkbox">
+        <label for="snapInput">Snap to </label><input style="width: 50px;" id="snapInput" type="number" value="0">
+        <br>
+        <table id="point_list" class="pointTable">
+            <tr style="vertical-align: top;">
+                <th style="width: 60px;">Num</th>
+                <th style="min-width: 60px;">X</th>
+                <th style="min-width: 60px;">Y</th>
+                <th style="min-width: 60px;">D</th>
+                <th style="min-width: 60px;">H</th>
+                <th style="min-width: 50px;">R</th>
+                <th style="width: 60px;"><input style="width: 50px;" type="button" value="New" id="newButton"></th>
+                <th style="width: 60px;"><input style="width: 50px;" type="button" value="Clear" id="clearButton"></th>
+            </tr>
+        </table>
+        <input id="copyCodeButton" type="button" value="Copy code" onclick="copyCode()">
+        <input id="exportCodeButton" type="button" value="Export code">
+        <input id="exportJSONButton" type="button" value="Export JSON">
+        <input id="importJSONButton" type="button" value="Import JSON">
+    </div>
+</div>
+
+<div style="display: none;">
+    <img id="field_image" src="assets/field.png">
+    <img id="skills_field_image" src="assets/skills.png">
+    <img id="robot_image" src="assets/robot.png">
+</div>
+
+<script src="scripts/main.js"></script>
+<script src="scripts/canvas.js"></script>
+<script src="scripts/data.js"></script>
+<script src="scripts/ui.js"></script>
+    
+</html>
