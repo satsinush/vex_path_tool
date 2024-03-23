@@ -1,0 +1,50 @@
+{
+"actions":[
+    {
+        "name": "moveTo",
+        "parameters":
+        [
+            {"name": "x",       "type": "number"},
+            {"name": "y",       "type": "number"},
+            {"name": "speed",   "type": "number"},
+            {"name": "reverse", "type": "boolean"},
+            {"name": "timeout", "type": "number"},
+            {"name": "point",   "type": "point"}
+        ],
+        "outputString": "moveTo({x},{y},{speed},{reverse},{timeout})"
+    },
+    {
+        "name": "move",
+        "parameters":
+        [
+            {"name": "distance","type": "number"},
+            {"name": "speed",   "type": "number"},
+            {"name": "reverse", "type": "boolean"},
+            {"name": "timeout", "type": "number"}
+        ],
+        "outputString": "move({distance},{speed},{reverse},{timeout})"
+    },
+    {
+        "name": "turnTo",
+        "parameters":
+        [
+            {"name": "heading", "type": "number"},
+            {"name": "speed",   "type": "number"},
+            {"name": "reverse", "type": "boolean"},
+            {"name": "timeout", "type": "number"},
+            {"name": "point",   "type": "point"}
+        ],
+        "outputString": "turnTo({heading},{speed},{reverse},{timeout})"
+    },
+    {
+        "name": "turn",
+        "parameters":
+        [
+            {"name": "degrees", "type": "number"},
+            {"name": "speed",   "type": "number"},
+            {"name": "reverse", "type": "boolean"},
+            {"name": "timeout", "type": "number"}
+        ],
+        "outputString": "turn({degrees},{speed},{reverse},{timeout})"
+    }
+]}

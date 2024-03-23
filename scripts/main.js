@@ -40,14 +40,26 @@ class Path{
         this.points.push(new Point(x,y,1000,false));
     }
     deletePoint(num){
+        this.actions.splice(num,1);
         this.points.splice(num,1);
     }
     clearAllPoints(){
+        this.actions = [];
         this.points = [];
     }
 }
 
 path = new Path();
+
+class Action{
+    constructor(n, p, o){
+        this.name = n;
+        this.parameters = p;
+        this.outputString = o; 
+    }
+}
+
+availableActions = []
 
 function print(message){
     console.log(message);

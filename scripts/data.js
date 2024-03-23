@@ -44,12 +44,12 @@ function importJSON(){
                 contents = reader.result;
                 parsedObject = JSON.parse(contents);
                 
-                robot = parsedObject.robot;
+                robot = parsedObject["robot"];
                 //path.progress = 0;
-                path = parsedObject.path;
-                p = parsedObject.path.points;
-                skills = parsedObject.skills;
-                snapTo = parsedObject.snapTo;
+                path = parsedObject["path"];
+                p = parsedObject.path["points"];
+                skills = parsedObject["skills"];
+                snapTo = parsedObject["snapTo"];
                 path.points = [];
                 for(i=0; i<p.length; i++){
                     path.points.push(new Point(p[i].x,p[i].y,p[i].timeout,p[i].reversed));
@@ -64,6 +64,19 @@ function importJSON(){
         input.click();
     }
 }
+
+function importActionsConfig(){
+    fetch("../config/actions.json")
+        .then(file => file.json())
+        .then(object => uploadActions(object));
+}
+
+function uploadActions(object){
+    availableActions = object["actions"];
+    console.log(availableActions);
+}
+
+importActionsConfig();
 
 function copyCode(){
     navigator.clipboard.writeText(getFormattedCodeString());
